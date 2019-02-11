@@ -12,6 +12,45 @@
 		<version>2.1.2.RELEASE</version>
 	</parent>
 
+	<name>jpa-type-flattenedjson</name>
+	<description>Simulate a new database datatype FlattenedJson based on the feature of @Convert since JPA 2.1</description>
+	<url>https://github.com/wnameless/jpa-type-flattenedjson</url>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+			<comments>A business-friendly OSS license</comments>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>scm:git:git@github.com:wnameless/jpa-type-flattenedjson.git</connection>
+		<developerConnection>scm:git:git@github.com:wnameless/jpa-type-flattenedjson.git</developerConnection>
+		<url>git@github.com:wnameless/jpa-type-flattenedjson.git</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<developers>
+		<developer>
+			<id>wnameless</id>
+			<name>Wei-Ming Wu</name>
+			<email>wnameless@gmail.com</email>
+		</developer>
+	</developers>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>javax.persistence</groupId>

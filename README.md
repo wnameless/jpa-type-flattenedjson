@@ -2,7 +2,7 @@
 
 jpa-type-flattenedjson
 =============
-Simulate a new database datatype FlattenedJson based on the feature of @Converter since JPA 2.1
+Simulate a new database datatype FlattenedJson based on the feature of @Convert since JPA 2.1
 
 ## Maven Repo
 ```xml

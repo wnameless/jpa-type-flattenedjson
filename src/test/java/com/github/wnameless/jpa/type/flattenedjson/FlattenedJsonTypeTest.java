@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.jpa.impl.JPAQuery;
 
@@ -32,15 +33,11 @@ public class FlattenedJsonTypeTest {
       FlattenedJsonTypeConfigurer.INSTANCE.getObjectMapperFactory().get();
 
   @Test
-  public void testJsonNodeDeserialized() {
-    assertEquals(1, testModelRepo.findAll().stream().filter(tm -> {
-      try {
-        return tm.props.equals(objectMapper.readTree("{ \"abc\":123 }"));
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-      return false;
-    }).count());
+  public void testJsonNodeDeserialized() throws IOException {
+    JsonNode node = objectMapper.readTree("{ \"abc\":123 }");
+
+    assertEquals(1, testModelRepo.findAll().stream()
+        .filter(tm -> tm.props.equals(node)).count());
   }
 
   @Test
