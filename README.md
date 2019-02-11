@@ -60,7 +60,7 @@ count = query
 ```
 
 ## Quick Start
-Annotates any field in JPA Entity class with @Convert and a converter class which extends ToFlattenedJsonConverter abstract class
+Annotate any field in JPA Entity class with @Convert and a converter class which extends ToFlattenedJsonConverter abstract class
 ```java
 @Convert(converter = TestModelAttrConverter.class)
 ```
@@ -114,7 +114,7 @@ FlattenedJsonTypeConfigurer.INSTANCE.setJsonFlattenerCustomizer(Supplier<ObjectM
 Any modification in FlattenedJsonTypeConfigurer will take effects on the entire library
 
 ### QuerydslHelper
-FlattenedJson LIKE <br>
+#### FlattenedJson LIKE <br>
 Just simply provide the JSON key and value, then the LIKE query pattern is created automatically
 ```java
 @Autowired
@@ -129,7 +129,7 @@ Ignore case
 QuerydslHelper.flattenedJsonlike(qTestModel.testAttr, "numbers[0]", "3", true);
 ```
 
-LIKE <br>
+#### LIKE <br>
 The LIKE query pattern need to be provide completely
 ```java
 @Autowired
@@ -144,13 +144,13 @@ Ignore case
 QuerydslHelper.like(qTestModel.testAttr, "'%\"numbers[0]\":0,%'", true);
 ```
 
-FlattenedJson REGEXP_LIKE <br>
+#### FlattenedJson REGEXP_LIKE <br>
 Just simply provide the JSON key and REGEXP of value, then the REGEXP_LIKE query pattern is created automatically
 ```java
 JPAQuery<TestModel> query = new JPAQuery<TestModel>(entityManager);
 QTestModel qTestModel = QTestModel.testModel;
-BooleanExpression exp = QuerydslHelper.flattenedJsonRegexpLike(qTestModel.testAttr, "numbers[0]", "\\d+");
 
+BooleanExpression exp = QuerydslHelper.flattenedJsonRegexpLike(qTestModel.testAttr, "numbers[0]", "\\d+");
 query.from(qTestModel).where(exp).fetchCount();
 ```
 By default, the key is quoted <br>
@@ -160,7 +160,7 @@ QuerydslHelper.flattenedJsonRegexpLike(qTestModel.testAttr, "numbers[0]", "\\d+"
 ```
 
 
-REGEXP_LIKE <br>
+#### REGEXP_LIKE <br>
 The REGEXP_LIKE query pattern need to be provide completely
 ```java
 JPAQuery<TestModel> query = new JPAQuery<TestModel>(entityManager);
@@ -189,3 +189,4 @@ public class AnyTypeConverter extends ToFlattenedJsonConverter<AnyType> {
 
 }
 ```
+JsonNodeConverter is already provided in library
