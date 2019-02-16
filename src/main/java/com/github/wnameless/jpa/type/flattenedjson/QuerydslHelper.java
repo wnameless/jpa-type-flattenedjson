@@ -25,9 +25,10 @@ import com.querydsl.core.types.dsl.Expressions;
 
 /**
  * 
- * {@link QuerydslHelper} can help users to make SQL LIKE or REGEXP_LIKE queries
- * based on QueryDSL to any filed which is annotated by
- * {@link javax.persistence.Convert @Convert}
+ * {@link QuerydslHelper} can help users to make SQL LIKE, REGEXP_LIKE or
+ * SUBSTRING queries based on the
+ * <a href="https://github.com/querydsl/querydsl">QueryDsl</a> to search any
+ * field which is annotated by {@link javax.persistence.Convert @Convert}.
  *
  */
 public class QuerydslHelper {
@@ -87,6 +88,7 @@ public class QuerydslHelper {
             exp2));
   }
 
+  // Implemented by SQL regexp_like
   public static <T> BooleanExpression regexpLike(Expression<T> path,
       String regexp) {
     return Expressions.booleanTemplate("regexp_like({0}, {1}) = 1", path,
@@ -107,6 +109,7 @@ public class QuerydslHelper {
         regex);
   }
 
+  // Implemented by SQL regexp_matches
   public static <T> BooleanExpression regexpMatches(Expression<T> path,
       String regexp) {
     return Expressions.booleanTemplate("regexp_matches({0}, {1}) = 1", path,
@@ -127,23 +130,24 @@ public class QuerydslHelper {
         regex);
   }
 
-  public static <T> BooleanExpression substring(Expression<T> path,
+  // Implemented by SQL substring
+  public static <T> BooleanExpression substringMatches(Expression<T> path,
       String regexp) {
-    return Expressions.booleanTemplate("substring({0}, {1}) != ''", path,
+    return Expressions.booleanTemplate("substring({0}, {1}) IS NOT NULL", path,
         regexp);
   }
 
-  public static <T> BooleanExpression flattenedJsonSubstring(Expression<T> path,
-      String key, String valueRegex) {
-    return flattenedJsonSubstring(path, key, valueRegex, true);
+  public static <T> BooleanExpression flattenedJsonSubstringMatches(
+      Expression<T> path, String key, String valueRegex) {
+    return flattenedJsonSubstringMatches(path, key, valueRegex, true);
   }
 
-  public static <T> BooleanExpression flattenedJsonSubstring(Expression<T> path,
-      String key, String valueRegex, boolean quoteKey) {
+  public static <T> BooleanExpression flattenedJsonSubstringMatches(
+      Expression<T> path, String key, String valueRegex, boolean quoteKey) {
     key = quoteKey ? quoteRegExSpecialChars(key) : key;
     String regex = REGEXP_PAIR_PREFIX + key + REGEXP_PAIR_INFIX + valueRegex
         + REGEXP_PAIR_SUFFIX;
-    return Expressions.booleanTemplate("substring({0}, {1}) != ''", path,
+    return Expressions.booleanTemplate("substring({0}, {1}) IS NOT NULL", path,
         regex);
   }
 

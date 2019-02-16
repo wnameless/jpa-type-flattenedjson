@@ -130,12 +130,6 @@ public class MySqlFlattenedJsonTypeTest {
     JPAQuery<TestModel> query = new JPAQuery<TestModel>(em);
     QTestModel qTestModel = QTestModel.testModel;
 
-    assertEquals(2,
-        query.from(qTestModel).where(QuerydslHelper
-            .flattenedJsonRegexpLike(qTestModel.testAttr, "numbers[0]", "\\d+"))
-            .fetchCount());
-
-    query = new JPAQuery<TestModel>(em);
     assertEquals(0,
         query.from(qTestModel)
             .where(QuerydslHelper.flattenedJsonRegexpLike(qTestModel.testAttr,

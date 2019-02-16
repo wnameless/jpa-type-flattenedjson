@@ -3,6 +3,7 @@ package com.github.wnameless.jpa.type.flattenedjson;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import javax.persistence.EntityManager;
 
@@ -34,7 +35,7 @@ public class PostgresqlFlattenedJsonTypeTest {
       FlattenedJsonTypeConfigurer.INSTANCE.getObjectMapperFactory().get();
 
   @Test
-  public void testJsonNodeDeserialized() throws IOException {
+  public void testJsonNodeDeserialized() throws IOException, SQLException {
     JsonNode node = objectMapper.readTree("{ \"abc\":123 }");
 
     assertEquals(1, testModelRepo.findAll().stream()
@@ -100,13 +101,13 @@ public class PostgresqlFlattenedJsonTypeTest {
   }
 
   @Test
-  public void testQuerydslHelperSubstring() {
+  public void testQuerydslHelperSubstringMatches() {
     JPAQuery<TestModel> query = new JPAQuery<TestModel>(em);
     QTestModel qTestModel = QTestModel.testModel;
 
     assertEquals(2,
         query.from(qTestModel)
-            .where(QuerydslHelper.substring(qTestModel.testAttr,
+            .where(QuerydslHelper.substringMatches(qTestModel.testAttr,
                 QuerydslHelper.REGEXP_PAIR_PREFIX
                     + QuerydslHelper.quoteRegExSpecialChars("numbers[0]")
                     + QuerydslHelper.REGEXP_PAIR_INFIX + "\\d+"
@@ -115,31 +116,25 @@ public class PostgresqlFlattenedJsonTypeTest {
   }
 
   @Test
-  public void testQuerydslHelperFlattenedJsonSubstring() {
+  public void testQuerydslHelperFlattenedJsonSubstringMatches() {
     JPAQuery<TestModel> query = new JPAQuery<TestModel>(em);
     QTestModel qTestModel = QTestModel.testModel;
 
-    assertEquals(2,
-        query.from(qTestModel).where(QuerydslHelper
-            .flattenedJsonSubstring(qTestModel.testAttr, "numbers[0]", "\\d+"))
-            .fetchCount());
+    assertEquals(2, query.from(qTestModel)
+        .where(QuerydslHelper.flattenedJsonSubstringMatches(qTestModel.testAttr,
+            "numbers[0]", "\\d+"))
+        .fetchCount());
   }
 
   @Test
-  public void testQuerydslHelperFlattenedJsonSubstringQuoteKey() {
+  public void testQuerydslHelperFlattenedJsonSubstringMatchesQuoteKey() {
     JPAQuery<TestModel> query = new JPAQuery<TestModel>(em);
     QTestModel qTestModel = QTestModel.testModel;
 
-    assertEquals(2,
-        query.from(qTestModel).where(QuerydslHelper
-            .flattenedJsonSubstring(qTestModel.testAttr, "numbers[0]", "\\d+"))
-            .fetchCount());
-
-    query = new JPAQuery<TestModel>(em);
     assertEquals(0,
         query.from(qTestModel)
-            .where(QuerydslHelper.flattenedJsonSubstring(qTestModel.testAttr,
-                "numbers[0]", "\\d+", false))
+            .where(QuerydslHelper.flattenedJsonSubstringMatches(
+                qTestModel.testAttr, "numbers[0]", "\\d+", false))
             .fetchCount());
   }
 

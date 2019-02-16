@@ -129,7 +129,6 @@ public class HsqldbFlattenedJsonTypeTest {
     JPAQuery<TestModel> query = new JPAQuery<TestModel>(em);
     QTestModel qTestModel = QTestModel.testModel;
 
-    query = new JPAQuery<TestModel>(em);
     assertEquals(0,
         query.from(qTestModel)
             .where(QuerydslHelper.flattenedJsonRegexpMatches(
