@@ -15,6 +15,8 @@ public class TestDataInitializer {
 
   @PostConstruct
   void after() throws IOException {
+    if (testModelRepo.count() != 0) return;
+
     TestModel model = new TestModel();
     model.setProps(FlattenedJsonTypeConfigurer.INSTANCE.getObjectMapperFactory()
         .get().readTree("{\"abc\":123}"));

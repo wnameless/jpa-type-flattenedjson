@@ -15,6 +15,7 @@
  */
 package com.github.wnameless.jpa.type.flattenedjson;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.querydsl.core.types.Expression;
@@ -31,14 +32,25 @@ import com.querydsl.core.types.dsl.Expressions;
  */
 public class QuerydslHelper {
 
-  public static String REGEXP_PAIR_PREFIX = "[{,]" + "\"";
+  public static String REGEXP_PAIR_PREFIX = ".*[{,]" + "\"";
   public static String REGEXP_PAIR_INFIX = "\":";
-  public static String REGEXP_PAIR_SUFFIX = "[,}]";
+  public static String REGEXP_PAIR_SUFFIX = "[,}].*";
 
   public static String LIKE_PAIR_PREFIX = "'%\"";
   public static String LIKE_PAIR_INFIX = "\":";
   public static String LIKE_PAIR_SUFFIX1 = ",\"%'";
   public static String LIKE_PAIR_SUFFIX2 = "}'";
+
+  private static final String regExSpecialChars = "<([{\\^-=$!|]})?*+.>";
+  private static final String regExSpecialCharsRE =
+      regExSpecialChars.replaceAll(".", "\\\\$0");
+  private static final Pattern reCharsREP =
+      Pattern.compile("[" + regExSpecialCharsRE + "]");
+
+  public static String quoteRegExSpecialChars(String s) {
+    Matcher m = reCharsREP.matcher(s);
+    return m.replaceAll("\\\\$0");
+  }
 
   private QuerydslHelper() {}
 
@@ -88,10 +100,50 @@ public class QuerydslHelper {
 
   public static <T> BooleanExpression flattenedJsonRegexpLike(
       Expression<T> path, String key, String valueRegex, boolean quoteKey) {
-    key = quoteKey ? Pattern.quote(key) : key;
+    key = quoteKey ? quoteRegExSpecialChars(key) : key;
     String regex = REGEXP_PAIR_PREFIX + key + REGEXP_PAIR_INFIX + valueRegex
         + REGEXP_PAIR_SUFFIX;
     return Expressions.booleanTemplate("regexp_like({0}, {1}) = 1", path,
+        regex);
+  }
+
+  public static <T> BooleanExpression regexpMatches(Expression<T> path,
+      String regexp) {
+    return Expressions.booleanTemplate("regexp_matches({0}, {1}) = 1", path,
+        regexp);
+  }
+
+  public static <T> BooleanExpression flattenedJsonRegexpMatches(
+      Expression<T> path, String key, String valueRegex) {
+    return flattenedJsonRegexpMatches(path, key, valueRegex, true);
+  }
+
+  public static <T> BooleanExpression flattenedJsonRegexpMatches(
+      Expression<T> path, String key, String valueRegex, boolean quoteKey) {
+    key = quoteKey ? quoteRegExSpecialChars(key) : key;
+    String regex = REGEXP_PAIR_PREFIX + key + REGEXP_PAIR_INFIX + valueRegex
+        + REGEXP_PAIR_SUFFIX;
+    return Expressions.booleanTemplate("regexp_matches({0}, {1}) = 1", path,
+        regex);
+  }
+
+  public static <T> BooleanExpression substring(Expression<T> path,
+      String regexp) {
+    return Expressions.booleanTemplate("substring({0}, {1}) != ''", path,
+        regexp);
+  }
+
+  public static <T> BooleanExpression flattenedJsonSubstring(Expression<T> path,
+      String key, String valueRegex) {
+    return flattenedJsonSubstring(path, key, valueRegex, true);
+  }
+
+  public static <T> BooleanExpression flattenedJsonSubstring(Expression<T> path,
+      String key, String valueRegex, boolean quoteKey) {
+    key = quoteKey ? quoteRegExSpecialChars(key) : key;
+    String regex = REGEXP_PAIR_PREFIX + key + REGEXP_PAIR_INFIX + valueRegex
+        + REGEXP_PAIR_SUFFIX;
+    return Expressions.booleanTemplate("substring({0}, {1}) != ''", path,
         regex);
   }
 

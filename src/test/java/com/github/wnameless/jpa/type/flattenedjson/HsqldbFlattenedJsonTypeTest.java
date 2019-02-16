@@ -3,7 +3,6 @@ package com.github.wnameless.jpa.type.flattenedjson;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 
@@ -12,16 +11,18 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.jpa.impl.JPAQuery;
 
+@ActiveProfiles(profiles = "hsqldb")
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TestApplication.class,
     webEnvironment = WebEnvironment.RANDOM_PORT)
-public class FlattenedJsonTypeTest {
+public class HsqldbFlattenedJsonTypeTest {
 
   @Autowired
   TestModelRepository testModelRepo;
@@ -99,45 +100,40 @@ public class FlattenedJsonTypeTest {
   }
 
   @Test
-  public void testQuerydslHelperRegexpLike() {
+  public void testQuerydslHelperRegexpMatches() {
     JPAQuery<TestModel> query = new JPAQuery<TestModel>(em);
     QTestModel qTestModel = QTestModel.testModel;
 
     assertEquals(2,
         query.from(qTestModel)
-            .where(QuerydslHelper.regexpLike(qTestModel.testAttr,
-                QuerydslHelper.REGEXP_PAIR_PREFIX + Pattern.quote("numbers[0]")
+            .where(QuerydslHelper.regexpMatches(qTestModel.testAttr,
+                QuerydslHelper.REGEXP_PAIR_PREFIX
+                    + QuerydslHelper.quoteRegExSpecialChars("numbers[0]")
                     + QuerydslHelper.REGEXP_PAIR_INFIX + "\\d+"
                     + QuerydslHelper.REGEXP_PAIR_SUFFIX))
             .fetchCount());
   }
 
   @Test
-  public void testQuerydslHelperFlattenedJsonRegexpLike() {
+  public void testQuerydslHelperFlattenedJsonRegexpMatches() {
     JPAQuery<TestModel> query = new JPAQuery<TestModel>(em);
     QTestModel qTestModel = QTestModel.testModel;
 
-    assertEquals(2,
-        query.from(qTestModel).where(QuerydslHelper
-            .flattenedJsonRegexpLike(qTestModel.testAttr, "numbers[0]", "\\d+"))
-            .fetchCount());
+    assertEquals(2, query.from(qTestModel).where(QuerydslHelper
+        .flattenedJsonRegexpMatches(qTestModel.testAttr, "numbers[0]", "\\d+"))
+        .fetchCount());
   }
 
   @Test
-  public void testQuerydslHelperFlattenedJsonRegexpLikeQuoteKey() {
+  public void testQuerydslHelperFlattenedJsonRegexpMatchesQuoteKey() {
     JPAQuery<TestModel> query = new JPAQuery<TestModel>(em);
     QTestModel qTestModel = QTestModel.testModel;
-
-    assertEquals(2,
-        query.from(qTestModel).where(QuerydslHelper
-            .flattenedJsonRegexpLike(qTestModel.testAttr, "numbers[0]", "\\d+"))
-            .fetchCount());
 
     query = new JPAQuery<TestModel>(em);
     assertEquals(0,
         query.from(qTestModel)
-            .where(QuerydslHelper.flattenedJsonRegexpLike(qTestModel.testAttr,
-                "numbers[0]", "\\d+", false))
+            .where(QuerydslHelper.flattenedJsonRegexpMatches(
+                qTestModel.testAttr, "numbers[0]", "\\d+", false))
             .fetchCount());
   }
 

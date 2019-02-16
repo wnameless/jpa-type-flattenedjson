@@ -5,15 +5,11 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.Data;
 
-@Table(
-    indexes = { @Index(columnList = "props"), @Index(columnList = "testAttr") })
 @Data
 @Entity
 public class TestModel {
@@ -22,11 +18,11 @@ public class TestModel {
   @Id
   Long id;
 
-  @Column(columnDefinition = "varchar(max)")
+  @Column(length = 4000)
   @Convert(converter = JsonNodeConverter.class)
   JsonNode props;
 
-  @Column(columnDefinition = "varchar(max)")
+  @Column(length = 4000)
   @Convert(converter = TestModelAttrConverter.class)
   TestModelAttr testAttr;
 
