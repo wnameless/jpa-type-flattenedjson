@@ -2,7 +2,11 @@
 
 jpa-type-flattenedjson
 =============
-Simulate a new database datatype FlattenedJson based on the feature of @Convert since JPA 2.1.
+Simulate a new database datatype FlattenedJson based on the feature of AttributeConverter since JPA 2.1.
+
+# Goal
+- Make all kinds of relational databases to support JSON data format with as little effort as possible. <br>
+- Allow user to search arbitrary JSON data through JPA without using database special functions(Ex: JSON_CONTAINS).
 
 ## Maven Repository
 ```xml
@@ -13,18 +17,14 @@ Simulate a new database datatype FlattenedJson based on the feature of @Convert 
 </dependency>
 ```
 
-# Goal
-- Make all kinds of relational databases to support JSON data format with as little effort as possible. <br>
-- Allow user to seach arbitrary JSON data through JPA without using database special functions(Ex: JSON_CONTAINS).
-
 ## Concept Brief
 Normally JSON format can not be queried directly with SQL, it's required the database to provide special functions to search JSON data. For example, the JSON_CONTAINS function in MySQL database. <br>
 
 However, all those special functions are not well supported by all RDBMS and it tends to break the SQL convention somehow. <br>
 
-AttributeConverter was introduced in JPA 2.1. It allows any field of an entity class to be converted to JSON string which can be stored as Varchar in all databases. <br>
+AttributeConverter was introduced in JPA 2.1. It allows any field of an entity class to be converted to JSON string which can also be stored as Varchar in all databases. <br>
 
-Applying [JsonFlattener](https://github.com/wnameless/json-flattener) on stored JSON string makes us possible to search the flattened JSON data by regular SQL LIKE or REGEXP related function without losing performance.
+Applying [JsonFlattener](https://github.com/wnameless/json-flattener) on stored JSON string makes us possible to search a flattened JSON data by regular SQL LIKE or REGEXP related function without losing performance.
 
 ## Howto 
 Turn arbitrary objects into flattened JSON string and store them into database as Character datatype.
@@ -112,12 +112,31 @@ public class TestModelAttrConverter
 ```
 
 ## Features
-Because REGEXP_LIKE is not a standard SQL function, it is required a little configuration to support this feature. <br>
-So far, Hibernate is the only ORM supported.
-### REGEXP_LIKE
+Because REGEXP of databases is supported in different ways, it is required a little configuration to enable this feature. <br>
+So far, Hibernate is the only ORM supported. <br>
+
+The following table shows all tested databases: <br>
+
+| Database   |  REGEXP_LIKE  |  REGEXP_MATCHES | SUBSTRING
+|------------|---------------|-----------------|----------|
+| H2         |  &#9745;      |  &#9744;        |  &#9744; |
+| HSQLDB     |  &#9744;      |  &#9745;        |  &#9744; |
+| MySQL      |  &#9745;      |  &#9744;        |  &#9744; |
+| PostgreSQL |  &#9744;      |  &#9744;        |  &#9745; |
+
+### Configuration (Since v0.2.0, REGEXP_MATCHES and SUBSTRING are also supported.)
 Spring application.properties
-```
+```javascript
+// Add REGEX_LIKE function support to Hibernate
 hibernate.metadata_builder_contributor=com.github.wnameless.jpa.type.flattenedjson.hibernate.RegexpLikeSqlFunctionContributor
+```
+```javascript
+// Add REGEX_MATCHES function support to Hibernate
+hibernate.metadata_builder_contributor=com.github.wnameless.jpa.type.flattenedjson.hibernate.RegexpMatchesSqlFunctionContributor
+```
+```javascript
+// Add SUBSTRING function support to Hibernate
+hibernate.metadata_builder_contributor=com.github.wnameless.jpa.type.flattenedjson.hibernate.SubstringSqlFunctionContributor
 ```
 Java persistence.xml
 ```xml
@@ -126,6 +145,159 @@ Java persistence.xml
     value="com.github.wnameless.jpa.type.flattenedjson.hibernate.RegexpLikeSqlFunctionContributor"
 </property>
 ```
+```xml
+<property>
+    name="hibernate.metadata_builder_contributor" 
+    value="com.github.wnameless.jpa.type.flattenedjson.hibernate.RegexpMatchesSqlFunctionContributor"
+</property>
+```
+```xml
+<property>
+    name="hibernate.metadata_builder_contributor" 
+    value="com.github.wnameless.jpa.type.flattenedjson.hibernate.SubstringSqlFunctionContributor"
+</property>
+```
+
+### QuerydslHelper
+#### FlattenedJson LIKE
+Just simply provide the JSON key and value, then the LIKE query pattern is created automatically.
+```java
+@Autowired
+TestModelRepository testModelRepo; // Spring Data
+QTestModel qTestModel = QTestModel.testModel;
+
+BooleanExpression exp = QuerydslHelper.flattenedJsonlike(qTestModel.testAttr, "numbers[0]", "3");
+testModelRepo.count(exp); 
+```
+Ignore case
+```java
+QuerydslHelper.flattenedJsonlike(qTestModel.testAttr, "numbers[0]", "3", true);
+```
+
+#### LIKE
+This query pattern need to be provide completely.
+```java
+@Autowired
+TestModelRepository testModelRepo; // Spring Data
+QTestModel qTestModel = QTestModel.testModel;
+
+BooleanExpression exp = QuerydslHelper.like(qTestModel.testAttr, "'%\"numbers[0]\":0,%'");
+testModelRepo.count(exp); 
+```
+Ignore case
+```java
+QuerydslHelper.like(qTestModel.testAttr, "'%\"numbers[0]\":0,%'", true);
+```
+
+#### REGEXP_LIKE
+This query pattern need to be provide completely.
+```java
+JPAQuery<TestModel> query = new JPAQuery<TestModel>(entityManager);
+QTestModel qTestModel = QTestModel.testModel;
+
+BooleanExpression exp = QuerydslHelper.regexpLike(qTestModel.testAttr,
+    QuerydslHelper.REGEXP_PAIR_PREFIX    // "[{,]" + "\""
+    + QuerydslHelper.quoteRegExSpecialChars("numbers[0]")
+    + QuerydslHelper.REGEXP_PAIR_INFIX   // "\":"
+    + "\\d+"
+    + QuerydslHelper.REGEXP_PAIR_SUFFIX); // "[,}]"
+
+query.from(qTestModel).where(exp).fetchCount();
+```
+
+#### FlattenedJson REGEXP_LIKE
+Just simply provide the JSON key and REGEXP of value, then the query pattern is created automatically.
+```java
+JPAQuery<TestModel> query = new JPAQuery<TestModel>(entityManager);
+QTestModel qTestModel = QTestModel.testModel;
+
+BooleanExpression exp = QuerydslHelper.flattenedJsonRegexpLike(qTestModel.testAttr, "numbers[0]", "\\d+");
+query.from(qTestModel).where(exp).fetchCount();
+```
+By default, the key is quoted. <br>
+This can be disable by doing this:
+```java
+QuerydslHelper.flattenedJsonRegexpLike(qTestModel.testAttr, "numbers[0]", "\\d+", false);
+```
+
+#### REGEXP_MATCHES
+This query pattern need to be provide completely.
+```java
+JPAQuery<TestModel> query = new JPAQuery<TestModel>(entityManager);
+QTestModel qTestModel = QTestModel.testModel;
+
+BooleanExpression exp = QuerydslHelper.regexpMatches(qTestModel.testAttr,
+    QuerydslHelper.REGEXP_PAIR_PREFIX    // "[{,]" + "\""
+    + QuerydslHelper.quoteRegExSpecialChars("numbers[0]")
+    + QuerydslHelper.REGEXP_PAIR_INFIX   // "\":"
+    + "\\d+"
+    + QuerydslHelper.REGEXP_PAIR_SUFFIX); // "[,}]"
+
+query.from(qTestModel).where(exp).fetchCount();
+```
+
+#### FlattenedJson REGEXP_MATCHES
+Just simply provide the JSON key and REGEXP of value, then the query pattern is created automatically.
+```java
+JPAQuery<TestModel> query = new JPAQuery<TestModel>(entityManager);
+QTestModel qTestModel = QTestModel.testModel;
+
+BooleanExpression exp = QuerydslHelper.flattenedJsonRegexpMatches(qTestModel.testAttr, "numbers[0]", "\\d+");
+query.from(qTestModel).where(exp).fetchCount();
+```
+By default, the key is quoted. <br>
+This can be disable by doing this:
+```java
+QuerydslHelper.flattenedJsonRegexpMatches(qTestModel.testAttr, "numbers[0]", "\\d+", false);
+```
+
+#### SUBSTRING_MATCHES
+Because we only care if the SUBSTRING MATCHES regexp pattern, not actually want to aquire the substring itself. The function is named as **#substringMatches** intead of **#substring** to avoid misunderstanding.
+
+This query pattern need to be provide completely.
+```java
+JPAQuery<TestModel> query = new JPAQuery<TestModel>(entityManager);
+QTestModel qTestModel = QTestModel.testModel;
+
+BooleanExpression exp = QuerydslHelper.substringMatches(qTestModel.testAttr,
+    QuerydslHelper.REGEXP_PAIR_PREFIX    // "[{,]" + "\""
+    + QuerydslHelper.quoteRegExSpecialChars("numbers[0]")
+    + QuerydslHelper.REGEXP_PAIR_INFIX   // "\":"
+    + "\\d+"
+    + QuerydslHelper.REGEXP_PAIR_SUFFIX); // "[,}]"
+
+query.from(qTestModel).where(exp).fetchCount();
+```
+
+#### FlattenedJson SUBSTRING_MATCHES
+Just simply provide the JSON key and REGEXP of value, then the query pattern is created automatically.
+```java
+JPAQuery<TestModel> query = new JPAQuery<TestModel>(entityManager);
+QTestModel qTestModel = QTestModel.testModel;
+
+BooleanExpression exp = QuerydslHelper.flattenedJsonSubstringMatches(qTestModel.testAttr, "numbers[0]", "\\d+");
+query.from(qTestModel).where(exp).fetchCount();
+```
+By default, the key is quoted. <br>
+This can be disable by doing this:
+```java
+QuerydslHelper.flattenedJsonSubstringMatches(qTestModel.testAttr, "numbers[0]", "\\d+", false);
+```
+
+### ToFlattenedJsonConverter
+A base class to create a new JPA Converter of arbitrary type for FlattenedJson.
+```java
+@Converter
+public class AnyTypeConverter extends ToFlattenedJsonConverter<AnyType> {
+
+  @Override
+  protected TypeReference<AnyType> getAttributeTypeReference() {
+    return new TypeReference<AnyType>() {};
+  }
+
+}
+```
+JsonNodeConverter is already provided in library.
 
 ### FlattenedJsonTypeConfigurer
 FlattenedJsonTypeConfigurer is an enum with a single vlaue INSTANCE which also implies it's a singleton.
@@ -147,81 +319,3 @@ FlattenedJsonTypeConfigurer.INSTANCE.setJsonFlattenerCustomizer(Supplier<ObjectM
 ```
 
 Any modification in FlattenedJsonTypeConfigurer will take effects on the entire library.
-
-### QuerydslHelper
-#### FlattenedJson LIKE <br>
-Just simply provide the JSON key and value, then the LIKE query pattern is created automatically.
-```java
-@Autowired
-TestModelRepository testModelRepo; // Spring Data
-QTestModel qTestModel = QTestModel.testModel;
-
-BooleanExpression exp = QuerydslHelper.flattenedJsonlike(qTestModel.testAttr, "numbers[0]", "3");
-testModelRepo.count(exp); 
-```
-Ignore case
-```java
-QuerydslHelper.flattenedJsonlike(qTestModel.testAttr, "numbers[0]", "3", true);
-```
-
-#### LIKE <br>
-The LIKE query pattern need to be provide completely.
-```java
-@Autowired
-TestModelRepository testModelRepo; // Spring Data
-QTestModel qTestModel = QTestModel.testModel;
-
-BooleanExpression exp = QuerydslHelper.like(qTestModel.testAttr, "'%\"numbers[0]\":0,%'");
-testModelRepo.count(exp); 
-```
-Ignore case
-```java
-QuerydslHelper.like(qTestModel.testAttr, "'%\"numbers[0]\":0,%'", true);
-```
-
-#### FlattenedJson REGEXP_LIKE <br>
-Just simply provide the JSON key and REGEXP of value, then the REGEXP_LIKE query pattern is created automatically.
-```java
-JPAQuery<TestModel> query = new JPAQuery<TestModel>(entityManager);
-QTestModel qTestModel = QTestModel.testModel;
-
-BooleanExpression exp = QuerydslHelper.flattenedJsonRegexpLike(qTestModel.testAttr, "numbers[0]", "\\d+");
-query.from(qTestModel).where(exp).fetchCount();
-```
-By default, the key is quoted. <br>
-This can be disable
-```java
-QuerydslHelper.flattenedJsonRegexpLike(qTestModel.testAttr, "numbers[0]", "\\d+", false);
-```
-
-
-#### REGEXP_LIKE <br>
-The REGEXP_LIKE query pattern need to be provide completely.
-```java
-JPAQuery<TestModel> query = new JPAQuery<TestModel>(entityManager);
-QTestModel qTestModel = QTestModel.testModel;
-
-BooleanExpression exp = QuerydslHelper.regexpLike(qTestModel.testAttr,
-    QuerydslHelper.REGEXP_PAIR_PREFIX    // "[{,]" + "\""
-    + Pattern.quote("numbers[0]")
-    + QuerydslHelper.REGEXP_PAIR_INFIX   // "\":"
-    + "\\d+"
-    + QuerydslHelper.REGEXP_PAIR_SUFFIX); // "[,}]"
-
-query.from(qTestModel).where(exp).fetchCount();
-```
-
-### ToFlattenedJsonConverter
-A base class to create a new JPA Converter of arbitrary type for FlattenedJson.
-```java
-@Converter
-public class AnyTypeConverter extends ToFlattenedJsonConverter<AnyType> {
-
-  @Override
-  protected TypeReference<AnyType> getAttributeTypeReference() {
-    return new TypeReference<AnyType>() {};
-  }
-
-}
-```
-JsonNodeConverter is already provided in library.
