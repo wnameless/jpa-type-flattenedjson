@@ -24,9 +24,9 @@ However, all those special functions are not well supported by all RDBMS and it 
 
 AttributeConverter was introduced in JPA 2.1. It allows any field of an entity class to be converted to JSON string which can also be stored as Varchar in all databases. <br>
 
-Applying [JsonFlattener](https://github.com/wnameless/json-flattener) on stored JSON strings makes us possible to search a flattened JSON data by regular SQL LIKE or REGEXP related function without losing performance.
+Applying [JsonFlattener](https://github.com/wnameless/json-flattener) on stored JSON strings makes us possible to search a flattened JSON data by regular SQL LIKE or REGEXP related functions without losing performance.
 
-## Howto 
+## HowTo 
 Turn arbitrary objects into flattened JSON string and store them into database as Character datatype.
 ```java
 @Entity
@@ -38,10 +38,10 @@ public class TestModel {
 
   @Column(length = 4000)
   @Convert(converter = JsonNodeConverter.class)
-  JsonNode props; // From jackson-databind library
+  JsonNode props; // JsonNode is from jackson-databind library
 
   @Column(length = 4000)
-  @Convert(converter = TestModelAttrConverter.class) // Implemented easily by the provided abstract ToFlattenedJsonConverter class
+  @Convert(converter = TestModelAttrConverter.class) // Implemented by extending the abstract ToFlattenedJsonConverter class
   TestModelAttr testAttr;
 
 }
@@ -170,7 +170,9 @@ This query pattern need to be provide completely.
 TestModelRepository testModelRepo; // Spring Data
 QTestModel qTestModel = QTestModel.testModel;
 
+// BooleanExpression is also a Querysdsl Predicate
 BooleanExpression exp = QuerydslHelper.like(qTestModel.testAttr, "'%\"numbers[0]\":3,%'");
+// Spring Repository interface can accept Predicate by extending QueryDslPredicateExecutor interface
 testModelRepo.count(exp); 
 ```
 Ignore case
@@ -185,7 +187,9 @@ Just simply provide the JSON key and value, then the LIKE query pattern is creat
 TestModelRepository testModelRepo; // Spring Data
 QTestModel qTestModel = QTestModel.testModel;
 
+// BooleanExpression is also a Querysdsl Predicate
 BooleanExpression exp = QuerydslHelper.flattenedJsonlike(qTestModel.testAttr, "numbers[0]", "3");
+// Spring Repository interface can accept Predicate by extending QueryDslPredicateExecutor interface
 testModelRepo.count(exp); 
 ```
 Ignore case
