@@ -27,22 +27,6 @@ public class TestDataInitializer {
     tma.getNumbers().add(1);
     model.setTestAttr(tma);
 
-    testModelRepo.save(model);
-
-    model = new TestModel();
-    model.setProps(FlattenedJsonTypeConfigurer.INSTANCE.getObjectMapperFactory()
-        .get().readTree("{}"));
-
-    tma = new TestModelAttr();
-    tma.getNumbers().add(1);
-    tma.getNumbers().add(2);
-    tma.getNumbers().add(3);
-    model.setTestAttr(tma);
-
-    testModelRepo.save(model);
-
-    model = new TestModel();
-    tma = new TestModelAttr();
     tma.getWords().add(new HashMap() {
       {
         put("abc", "XYZ");
@@ -53,6 +37,17 @@ public class TestDataInitializer {
         put("DEF", "uvw");
       }
     });
+
+    testModelRepo.save(model);
+
+    model = new TestModel();
+    model.setProps(FlattenedJsonTypeConfigurer.INSTANCE.getObjectMapperFactory()
+        .get().readTree("{}"));
+
+    tma = new TestModelAttr();
+    tma.getNumbers().add(1);
+    tma.getNumbers().add(2);
+    tma.getNumbers().add(3);
     model.setTestAttr(tma);
 
     testModelRepo.save(model);

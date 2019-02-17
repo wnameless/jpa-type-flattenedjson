@@ -66,14 +66,17 @@ TestModelAttr tma = new TestModelAttr();
 tma.getNumbers().add(3);
 tma.getNumbers().add(2);
 tma.getNumbers().add(1);
+
+tma.getWords().add(new HashMap() {{ put("abc", "XYZ"); }});
+tma.getWords().add(new HashMap() {{ put("DEF", "uvw"); }});
 model.setTestAttr(tma);
 
 testModelRepo.save(model);
 
 // The actual data stored in database:
-// | id | props       | test_attr                                                 |
-// |----|-------------|-----------------------------------------------------------|
-// | 1  | {"abc":123} | {"numbers[0]":3,"numbers[1]":2,"numbers[2]":1,"words":[]} |
+// | id | props       | test_attr                                                                                |
+// |----|-------------|------------------------------------------------------------------------------------------|
+// | 1  | {"abc":123} | {"numbers[0]":3,"numbers[1]":2,"numbers[2]":1,"words[0].abc":"XYZ","words[1].DEF":"uvw"} |
 ```
 
 Query the stored data by [Querydsl](https://github.com/querydsl/querydsl) with SQL LIKE and REGEXP_LIKE functions supported. <br>
@@ -165,12 +168,12 @@ This query pattern need to be provide completely.
 TestModelRepository testModelRepo; // Spring Data
 QTestModel qTestModel = QTestModel.testModel;
 
-BooleanExpression exp = QuerydslHelper.like(qTestModel.testAttr, "'%\"numbers[0]\":0,%'");
+BooleanExpression exp = QuerydslHelper.like(qTestModel.testAttr, "'%\"numbers[0]\":3,%'");
 testModelRepo.count(exp); 
 ```
 Ignore case
 ```java
-QuerydslHelper.like(qTestModel.testAttr, "'%\"numbers[0]\":0,%'", true);
+QuerydslHelper.like(qTestModel.testAttr, "'%\"NUMBERS[0]\":3,%'", true);
 ```
 
 #### FlattenedJson LIKE
@@ -185,7 +188,7 @@ testModelRepo.count(exp);
 ```
 Ignore case
 ```java
-QuerydslHelper.flattenedJsonlike(qTestModel.testAttr, "numbers[0]", "3", true);
+QuerydslHelper.flattenedJsonlike(qTestModel.testAttr, "NUMBERS[0]", "3", true);
 ```
 
 #### REGEXP_LIKE
