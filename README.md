@@ -2,11 +2,11 @@
 
 jpa-type-flattenedjson
 =============
-Simulate a new database datatype FlattenedJson based on the feature of AttributeConverter since JPA 2.1.
+Simulate a new datatype *FlattenedJson* in database based on the AttributeConverter feature of since JPA 2.1 with Hibernate, QueryDsl, Jackson JSON and JsonFlattener.
 
 # Goal
 - Make all kinds of relational databases to support JSON data format with as little effort as possible. <br>
-- Allow user to search arbitrary JSON data through JPA without using database special functions(Ex: JSON_CONTAINS).
+- Allow user to search arbitrary JSON data through QueryDsl JPA without using database special functions(Ex: JSON_CONTAINS).
 
 ## Maven Repository
 ```xml
@@ -26,6 +26,8 @@ AttributeConverter was introduced in JPA 2.1. It allows any field of an entity c
 
 Applying [JsonFlattener](https://github.com/wnameless/json-flattener) on stored JSON strings makes us possible to search a flattened JSON data by regular SQL LIKE or REGEXP related function without losing performance.
 
+Usually to search a JSON data with regexp is a bad idea because JSON is not regular. Since it allows arbitrary embedding of nested data, it is almost near context-free. But a flattened JSON is much more regular, so using regexp on *FlattenedJson* is way more efficient and easier.
+
 ## Howto 
 Turn arbitrary objects into flattened JSON string and store them into database as Character datatype.
 ```java
@@ -38,8 +40,7 @@ public class TestModel {
 
   @Column(length = 4000)
   @Convert(converter = JsonNodeConverter.class)
-  // JsonNode is from jackson-databind library
-  JsonNode props;
+  JsonNode props; // JsonNode is from jackson-databind library
 
   @Column(length = 4000)
   // Implemented by extending the abstract ToFlattenedJsonConverter class
@@ -54,6 +55,7 @@ public class TestModelAttr {
 
   private List<Map<String, String>> words = new ArrayList<>();
 
+  // Getters and Setters...
 }
 ```
 ```java
@@ -62,9 +64,10 @@ TestModelRepository testModelRepo; // Spring Data
 
 TestModel testModel = new TestModel();
 testModel.setProps(FlattenedJsonTypeConfigurer.INSTANCE.getObjectMapperFactory()
-  .get().readTree("{\"abc\":123}"));
+  .get().readTree("{ \"abc\": { \"CBA\": 123 } }"));
 
 TestModelAttr tma = new TestModelAttr();
+
 tma.getNumbers().add(3);
 tma.getNumbers().add(2);
 tma.getNumbers().add(1);
@@ -76,9 +79,9 @@ model.setTestAttr(tma);
 testModelRepo.save(model);
 
 // The actual data stored in database:
-// | id | props       | test_attr                                                                                |
-// |----|-------------|------------------------------------------------------------------------------------------|
-// | 1  | {"abc":123} | {"numbers[0]":3,"numbers[1]":2,"numbers[2]":1,"words[0].abc":"XYZ","words[1].DEF":"uvw"} |
+// | id | props           | test_attr                                                                                |
+// |----|-----------------|------------------------------------------------------------------------------------------|
+// | 1  | {"abc.CBA":123} | {"numbers[0]":3,"numbers[1]":2,"numbers[2]":1,"words[0].abc":"XYZ","words[1].DEF":"uvw"} |
 ```
 
 Query the stored data by [QueryDsl](https://github.com/querydsl/querydsl) with SQL LIKE and REGEXP_LIKE functions supported. <br>
