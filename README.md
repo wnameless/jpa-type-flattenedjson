@@ -215,7 +215,7 @@ query.from(qTestModel).where(exp).fetchCount();
 ```
 By default, the key is quoted. This can be disable by doing this:
 ```java
-QuerydslHelper.flattenedJsonRegexpLike(qTestModel.testAttr, "numbers[0]", "\\d+", false);
+QuerydslHelper.flattenedJsonRegexpLike(qTestModel.testAttr, "numbers\\[0\\]", "\\d+", false);
 ```
 
 #### REGEXP_MATCHES
@@ -245,7 +245,7 @@ query.from(qTestModel).where(exp).fetchCount();
 ```
 By default, the key is quoted. This can be disable by doing this:
 ```java
-QuerydslHelper.flattenedJsonRegexpMatches(qTestModel.testAttr, "numbers[0]", "\\d+", false);
+QuerydslHelper.flattenedJsonRegexpMatches(qTestModel.testAttr, "numbers\\[0\\]", "\\d+", false);
 ```
 
 #### SUBSTRING_MATCHES
@@ -277,7 +277,7 @@ query.from(qTestModel).where(exp).fetchCount();
 ```
 By default, the key is quoted. This can be disable by doing this:
 ```java
-QuerydslHelper.flattenedJsonSubstringMatches(qTestModel.testAttr, "numbers[0]", "\\d+", false);
+QuerydslHelper.flattenedJsonSubstringMatches(qTestModel.testAttr, "numbers\\[0\\]", "\\d+", false);
 ```
 
 ### ToFlattenedJsonConverter
