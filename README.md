@@ -127,6 +127,8 @@ The following table shows all tested databases: <br>
 | PostgreSQL |  &#9744;      |  &#9744;        |  &#9745; |
 
 ### Configuration (Since v0.2.0, REGEXP_MATCHES and SUBSTRING are also supported.)
+Pick either of the configurations listed below which fits your database: <br>
+
 Spring application.properties
 ```javascript
 // Add REGEX_LIKE function support to Hibernate
