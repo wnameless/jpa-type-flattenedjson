@@ -35,7 +35,7 @@ public class HsqldbFlattenedJsonTypeTest {
 
   @Test
   public void testJsonNodeDeserialized() throws IOException {
-    JsonNode node = objectMapper.readTree("{ \"abc\":123 }");
+    JsonNode node = objectMapper.readTree("{\"abc\":{\"CBA\":123}}");
 
     assertEquals(1, testModelRepo.findAll().stream()
         .filter(tm -> tm.props.equals(node)).count());

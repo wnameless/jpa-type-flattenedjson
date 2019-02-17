@@ -19,7 +19,7 @@ public class TestDataInitializer {
   void after() throws IOException {
     TestModel model = new TestModel();
     model.setProps(FlattenedJsonTypeConfigurer.INSTANCE.getObjectMapperFactory()
-        .get().readTree("{\"abc\":123}"));
+        .get().readTree("{ \"abc\": { \"CBA\": 123 } }"));
 
     TestModelAttr tma = new TestModelAttr();
     tma.getNumbers().add(3);

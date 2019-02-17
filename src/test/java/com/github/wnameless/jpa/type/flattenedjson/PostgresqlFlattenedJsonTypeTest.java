@@ -36,7 +36,7 @@ public class PostgresqlFlattenedJsonTypeTest {
 
   @Test
   public void testJsonNodeDeserialized() throws IOException, SQLException {
-    JsonNode node = objectMapper.readTree("{ \"abc\":123 }");
+    JsonNode node = objectMapper.readTree("{\"abc\":{\"CBA\":123}}");
 
     assertEquals(1, testModelRepo.findAll().stream()
         .filter(tm -> tm.props.equals(node)).count());
