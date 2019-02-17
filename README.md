@@ -318,7 +318,7 @@ FlattenedJsonTypeConfigurer.INSTANCE.setJsonUnflattenerCustomizer(Function<JsonU
 FlattenedJsonType is powered by [jackson-databind](https://github.com/FasterXML/jackson-databind) as well.
 ```java
 FlattenedJsonTypeConfigurer.INSTANCE.getObjectMapperFactory();
-FlattenedJsonTypeConfigurer.INSTANCE.setJsonFlattenerCustomizer(Supplier<ObjectMapper> objectMapperFactory);
+FlattenedJsonTypeConfigurer.INSTANCE.setObjectMapperFactory(Supplier<ObjectMapper> objectMapperFactory);
 ```
 
 Any modification in FlattenedJsonTypeConfigurer will take effects on the entire library.
