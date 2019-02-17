@@ -6,7 +6,7 @@ Simulate a new datatype *FlattenedJson* in database based on the AttributeConver
 
 # Goal
 - Make all kinds of relational databases to support JSON data format with as little effort as possible. <br>
-- Allow user to search arbitrary JSON data through QueryDsl JPA without using database special functions(Ex: JSON_CONTAINS).
+- Allow user to search arbitrary JSON data through QueryDsl JPA without using database specified functions(Ex: JSON_CONTAINS).
 
 ## Maven Repository
 ```xml
@@ -29,7 +29,7 @@ Applying [JsonFlattener](https://github.com/wnameless/json-flattener) on stored 
 Usually to search a JSON data with regexp is a bad idea because JSON is not regular. Since it allows arbitrary embedding of nested data, it is almost near context-free. But a flattened JSON is much more regular, so using regexp on *FlattenedJson* is way more efficient and easier.
 
 ## Howto 
-Turn arbitrary objects into flattened JSON string and store them into database as Character datatype.
+Turn arbitrary objects into flattened JSON strings and store them into database as Character datatype.
 ```java
 @Entity
 public class TestModel {
