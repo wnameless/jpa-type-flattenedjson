@@ -38,10 +38,12 @@ public class TestModel {
 
   @Column(length = 4000)
   @Convert(converter = JsonNodeConverter.class)
-  JsonNode props; // From jackson-databind library
+  // JsonNode is from jackson-databind library
+  JsonNode props;
 
   @Column(length = 4000)
-  @Convert(converter = TestModelAttrConverter.class) // Implemented easily by the provided abstract ToFlattenedJsonConverter class
+  // Implemented by extending the abstract ToFlattenedJsonConverter class
+  @Convert(converter = TestModelAttrConverter.class)
   TestModelAttr testAttr;
 
 }
