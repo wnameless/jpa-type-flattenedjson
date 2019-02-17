@@ -2,6 +2,7 @@ package com.github.wnameless.jpa.type.flattenedjson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Data;
 
@@ -10,6 +11,6 @@ public class TestModelAttr {
 
   private List<Integer> numbers = new ArrayList<>();
 
-  private List<String> words = new ArrayList<>();
+  private List<Map<String, String>> words = new ArrayList<>();
 
 }

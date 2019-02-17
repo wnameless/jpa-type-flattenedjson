@@ -39,7 +39,7 @@ public class QuerydslHelper {
 
   public static String LIKE_PAIR_PREFIX = "'%\"";
   public static String LIKE_PAIR_INFIX = "\":";
-  public static String LIKE_PAIR_SUFFIX1 = ",\"%'";
+  public static String LIKE_PAIR_SUFFIX1 = ",%'";
   public static String LIKE_PAIR_SUFFIX2 = "}'";
 
   private static final String regExSpecialChars = "<([{\\^-=$!|]})?*+.>";

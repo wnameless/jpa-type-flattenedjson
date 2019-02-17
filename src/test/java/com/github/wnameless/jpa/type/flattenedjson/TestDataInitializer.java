@@ -1,6 +1,7 @@
 package com.github.wnameless.jpa.type.flattenedjson;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
 
@@ -13,10 +14,9 @@ public class TestDataInitializer {
   @Autowired
   TestModelRepository testModelRepo;
 
+  @SuppressWarnings({ "unchecked", "serial", "rawtypes" })
   @PostConstruct
   void after() throws IOException {
-    if (testModelRepo.count() != 0) return;
-
     TestModel model = new TestModel();
     model.setProps(FlattenedJsonTypeConfigurer.INSTANCE.getObjectMapperFactory()
         .get().readTree("{\"abc\":123}"));
@@ -43,8 +43,16 @@ public class TestDataInitializer {
 
     model = new TestModel();
     tma = new TestModelAttr();
-    tma.getWords().add("abc");
-    tma.getWords().add("XYZ");
+    tma.getWords().add(new HashMap() {
+      {
+        put("abc", "XYZ");
+      }
+    });
+    tma.getWords().add(new HashMap() {
+      {
+        put("DEF", "uvw");
+      }
+    });
     model.setTestAttr(tma);
 
     testModelRepo.save(model);

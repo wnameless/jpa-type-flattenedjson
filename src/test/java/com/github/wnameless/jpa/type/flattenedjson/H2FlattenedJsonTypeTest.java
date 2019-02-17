@@ -55,10 +55,10 @@ public class H2FlattenedJsonTypeTest {
   public void testQuerydslHelperLikeIgnoreCase() {
     QTestModel qTestModel = QTestModel.testModel;
 
-    assertEquals(0, testModelRepo.count(
-        QuerydslHelper.like(qTestModel.testAttr, "'%\"words[0]\":\"ABC\"%'")));
+    assertEquals(0, testModelRepo.count(QuerydslHelper.like(qTestModel.testAttr,
+        "'%\"words[0].abc\":\"xyz\"%'")));
     assertEquals(1, testModelRepo.count(QuerydslHelper.like(qTestModel.testAttr,
-        "'%\"words[1]\":\"xyz\"%'", true)));
+        "'%\"words[0].ABC\":\"xyz\"%'", true)));
   }
 
   @Test
@@ -85,17 +85,16 @@ public class H2FlattenedJsonTypeTest {
     JPAQuery<TestModel> query = new JPAQuery<TestModel>(em);
     QTestModel qTestModel = QTestModel.testModel;
 
-    assertEquals(0,
-        query
-            .from(qTestModel).where(QuerydslHelper
-                .flattenedJsonLike(qTestModel.testAttr, "words[0]", "\"ABC\""))
+    assertEquals(1,
+        query.from(qTestModel).where(QuerydslHelper
+            .flattenedJsonLike(qTestModel.testAttr, "words[1].DEF", "\"uvw\""))
             .fetchCount());
 
     query = new JPAQuery<TestModel>(em);
     assertEquals(1,
         query.from(qTestModel)
             .where(QuerydslHelper.flattenedJsonLike(qTestModel.testAttr,
-                "words[1]", "\"xyz\"", true))
+                "words[1].def", "\"UVW\"", true))
             .fetchCount());
   }
 

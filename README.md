@@ -50,7 +50,7 @@ public class TestModelAttr {
 
   private List<Integer> numbers = new ArrayList<>();
 
-  private List<String> words = new ArrayList<>();
+  private List<Map<String, String>> words = new ArrayList<>();
 
 }
 ```
