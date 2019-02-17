@@ -25,13 +25,13 @@ import com.querydsl.core.types.dsl.Expressions;
 
 /**
  * 
- * {@link QuerydslHelper} can help users to make SQL LIKE, REGEXP_LIKE or
+ * {@link QueryDslHelper} can help users to make SQL LIKE, REGEXP_LIKE or
  * SUBSTRING queries based on the
  * <a href="https://github.com/querydsl/querydsl">QueryDsl</a> to search any
  * field which is annotated by {@link javax.persistence.Convert @Convert}.
  *
  */
-public class QuerydslHelper {
+public class QueryDslHelper {
 
   public static String REGEXP_PAIR_PREFIX = ".*[{,]" + "\"";
   public static String REGEXP_PAIR_INFIX = "\":";
@@ -53,7 +53,7 @@ public class QuerydslHelper {
     return m.replaceAll("\\\\$0");
   }
 
-  private QuerydslHelper() {}
+  private QueryDslHelper() {}
 
   public static <T> BooleanExpression like(Expression<T> path, String pattern) {
     return like(path, pattern, false);

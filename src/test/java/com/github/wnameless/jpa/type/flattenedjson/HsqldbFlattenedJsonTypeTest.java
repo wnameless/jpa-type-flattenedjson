@@ -46,18 +46,18 @@ public class HsqldbFlattenedJsonTypeTest {
     QTestModel qTestModel = QTestModel.testModel;
 
     assertEquals(0, testModelRepo.count(
-        QuerydslHelper.like(qTestModel.testAttr, "'%\"numbers[0]\":0,%'")));
+        QueryDslHelper.like(qTestModel.testAttr, "'%\"numbers[0]\":0,%'")));
     assertEquals(1, testModelRepo.count(
-        QuerydslHelper.like(qTestModel.testAttr, "'%\"numbers[0]\":3,%'")));
+        QueryDslHelper.like(qTestModel.testAttr, "'%\"numbers[0]\":3,%'")));
   }
 
   @Test
   public void testQuerydslHelperLikeIgnoreCase() {
     QTestModel qTestModel = QTestModel.testModel;
 
-    assertEquals(0, testModelRepo.count(QuerydslHelper.like(qTestModel.testAttr,
+    assertEquals(0, testModelRepo.count(QueryDslHelper.like(qTestModel.testAttr,
         "'%\"words[0].abc\":\"xyz\"%'")));
-    assertEquals(1, testModelRepo.count(QuerydslHelper.like(qTestModel.testAttr,
+    assertEquals(1, testModelRepo.count(QueryDslHelper.like(qTestModel.testAttr,
         "'%\"words[0].abc\":\"xyz\"%'", true)));
   }
 
@@ -68,14 +68,14 @@ public class HsqldbFlattenedJsonTypeTest {
 
     assertEquals(1,
         query
-            .from(qTestModel).where(QuerydslHelper
+            .from(qTestModel).where(QueryDslHelper
                 .flattenedJsonLike(qTestModel.testAttr, "numbers[0]", "3"))
             .fetchCount());
 
     query = new JPAQuery<TestModel>(em);
     assertEquals(1,
         query
-            .from(qTestModel).where(QuerydslHelper
+            .from(qTestModel).where(QueryDslHelper
                 .flattenedJsonLike(qTestModel.testAttr, "numbers[0]", "1"))
             .fetchCount());
   }
@@ -86,14 +86,14 @@ public class HsqldbFlattenedJsonTypeTest {
     QTestModel qTestModel = QTestModel.testModel;
 
     assertEquals(1,
-        query.from(qTestModel).where(QuerydslHelper
+        query.from(qTestModel).where(QueryDslHelper
             .flattenedJsonLike(qTestModel.testAttr, "words[1].DEF", "\"uvw\""))
             .fetchCount());
 
     query = new JPAQuery<TestModel>(em);
     assertEquals(1,
         query.from(qTestModel)
-            .where(QuerydslHelper.flattenedJsonLike(qTestModel.testAttr,
+            .where(QueryDslHelper.flattenedJsonLike(qTestModel.testAttr,
                 "words[1].def", "\"UVW\"", true))
             .fetchCount());
   }
@@ -105,11 +105,11 @@ public class HsqldbFlattenedJsonTypeTest {
 
     assertEquals(2,
         query.from(qTestModel)
-            .where(QuerydslHelper.regexpMatches(qTestModel.testAttr,
-                QuerydslHelper.REGEXP_PAIR_PREFIX
-                    + QuerydslHelper.quoteRegExSpecialChars("numbers[0]")
-                    + QuerydslHelper.REGEXP_PAIR_INFIX + "\\d+"
-                    + QuerydslHelper.REGEXP_PAIR_SUFFIX))
+            .where(QueryDslHelper.regexpMatches(qTestModel.testAttr,
+                QueryDslHelper.REGEXP_PAIR_PREFIX
+                    + QueryDslHelper.quoteRegExSpecialChars("numbers[0]")
+                    + QueryDslHelper.REGEXP_PAIR_INFIX + "\\d+"
+                    + QueryDslHelper.REGEXP_PAIR_SUFFIX))
             .fetchCount());
   }
 
@@ -118,7 +118,7 @@ public class HsqldbFlattenedJsonTypeTest {
     JPAQuery<TestModel> query = new JPAQuery<TestModel>(em);
     QTestModel qTestModel = QTestModel.testModel;
 
-    assertEquals(2, query.from(qTestModel).where(QuerydslHelper
+    assertEquals(2, query.from(qTestModel).where(QueryDslHelper
         .flattenedJsonRegexpMatches(qTestModel.testAttr, "numbers[0]", "\\d+"))
         .fetchCount());
   }
@@ -130,7 +130,7 @@ public class HsqldbFlattenedJsonTypeTest {
 
     assertEquals(0,
         query.from(qTestModel)
-            .where(QuerydslHelper.flattenedJsonRegexpMatches(
+            .where(QueryDslHelper.flattenedJsonRegexpMatches(
                 qTestModel.testAttr, "numbers[0]", "\\d+", false))
             .fetchCount());
   }
