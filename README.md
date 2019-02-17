@@ -2,7 +2,7 @@
 
 jpa-type-flattenedjson
 =============
-Simulate a new datatype *FlattenedJson* in database based on the AttributeConverter feature of since JPA 2.1 with Hibernate, QueryDsl, Jackson JSON and JsonFlattener.
+Simulate a new datatype *FlattenedJson* in database based on the AttributeConverter feature of JPA 2.1 with Hibernate, QueryDsl, Jackson JSON and JsonFlattener.
 
 # Goal
 - Make all kinds of relational databases to support JSON data format with as little effort as possible. <br>

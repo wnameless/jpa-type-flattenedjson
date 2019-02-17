@@ -13,7 +13,7 @@
 	</parent>
 
 	<name>jpa-type-flattenedjson</name>
-	<description>Simulate a new database datatype FlattenedJson based on the feature of @Convert since JPA 2.1</description>
+	<description>Simulate a new datatype FlattenedJson in database based on the AttributeConverter feature of JPA 2.1 with Hibernate, QueryDsl, Jackson JSON and JsonFlattener.</description>
 	<url>https://github.com/wnameless/jpa-type-flattenedjson</url>
 
 	<licenses>
