@@ -13,7 +13,7 @@ Simulate a new datatype *FlattenedJson* in database based on the AttributeConver
 <dependency>
 	<groupId>com.github.wnameless</groupId>
 	<artifactId>jpa-type-flattenedjson</artifactId>
-	<version>0.2.0</version>
+	<version>0.2.1</version>
 </dependency>
 ```
 
