@@ -1,0 +1,8 @@
+Version 0.1.0
++ First release
+
+Version 0.2.0
++ Add REGEXP_MATCHES and SUBSTRING
+
+Version 0.2.1
+* Change json-flattener to v0.7.0
